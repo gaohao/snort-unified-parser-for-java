@@ -25,7 +25,6 @@ public class SnortUnified {
 		
 		DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
 		
-		
 	}
 	
 	

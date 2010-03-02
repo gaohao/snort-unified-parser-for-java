@@ -24,6 +24,11 @@ public class Unified2RecordHeader {
 	public void setLength(long length) {
 		this.length = length;
 	}
+	
+	public void clear() {
+		this.length = 0;
+		this.type = 0;
+	}
 
 	long length;
 	long type;

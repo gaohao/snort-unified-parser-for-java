@@ -58,7 +58,7 @@ public class SnortUnified {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		String f = "D:\\temp\\snort2.log.1267172679";
+		String f = "snort2.log.1267172679";
 		SnortUnified su = new SnortUnified();
 		su.parse(f);
 	}

@@ -36,6 +36,12 @@ package org.michaelmiranda.snort.parsers;
  * @author Michael J. A. Miranda
  *
  */
-public class EthernetFrame {
-
+public class EthernetFramePacket {
+	
+	private Unified2Packet packet;
+	
+	public static final long DST_SIZE = 6;
+	public static final long SRC_SIZE = 6;
+	public static final long FRAME_TYPE = 2;
+	
 }

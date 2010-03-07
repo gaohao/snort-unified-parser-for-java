@@ -82,6 +82,10 @@ public class SnortUnified {
 		}
 				
 	}
+	
+	public void readPacket(FileChannel fc, long packetLength) {
+		
+	}
 		
 	public SnortUnified() {
 		bytes1 = new byte[1];
@@ -192,4 +196,5 @@ public class SnortUnified {
 	public static final int LINK_TYPE_SIZE = 4;
 	public static final int PACKET_LENGTH_SIZE = 4;
 
+	public static final int ETHERNET_LINK = 1;
 }

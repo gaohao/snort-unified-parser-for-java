@@ -24,96 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Project: SnortUnifiedParser
- * Filename: EthernetFrame.java
+ * Filename: SnortPacketInterface.java
  * Package: org.michaelmiranda.snort.parsers
- * Timestamp: Mar 5, 2010 10:03:56 PM
+ * Timestamp: Mar 7, 2010 11:40:34 AM
  * Author: Michael J. A. Miranda
  */
 package org.michaelmiranda.snort.parsers;
-
 
 /**
  * @author Michael J. A. Miranda
  *
  */
-public class EthernetFramePacket implements SnortPacketInterface {
-	
-	
-	public void clear() {
-		u2packet = null;		
-	}
-	
-		
-	/**
-	 * @return the packet
-	 */
-	public Unified2Packet getU2Packet() {
-		return u2packet;
-	}
-	/**
-	 * @param packet the packet to set
-	 */
-	public void setU2Packet(Unified2Packet packet) {
-		this.u2packet = packet;
-	}
+public interface SnortPacketInterface {
 
-	/**
-	 * @return the etherDestination
-	 */
-	public long getEtherDestination() {
-		return etherDestination;
-	}
-
-
-	/**
-	 * @param etherDestination the etherDestination to set
-	 */
-	public void setEtherDestination(long etherDestination) {
-		this.etherDestination = etherDestination;
-	}
-
-
-	/**
-	 * @return the etherSource
-	 */
-	public long getEtherSource() {
-		return etherSource;
-	}
-
-
-	/**
-	 * @param etherSource the etherSource to set
-	 */
-	public void setEtherSource(long etherSource) {
-		this.etherSource = etherSource;
-	}
-
-
-	/**
-	 * @return the frameType
-	 */
-	public long getFrameType() {
-		return frameType;
-	}
-
-
-	/**
-	 * @param frameType the frameType to set
-	 */
-	public void setFrameType(long frameType) {
-		this.frameType = frameType;
-	}
-	
-	private long etherDestination;
-	private long etherSource;
-	private long frameType;
-
-	
-	private Unified2Packet u2packet;	
-	public static final long DST_SIZE = 6;
-	public static final long SRC_SIZE = 6;
-	public static final long FRAME_TYPE_SIZE = 2;
-	public static final int IP_TYPE = 2048;
-	
+	public void clear();
 	
 }

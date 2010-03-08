@@ -86,6 +86,23 @@ public class Utilities {
 	    return i;
 	}
 	
+	public static final long sixBytesToLong(byte[] b) 
+	{
+	    long l = 0;
+	    l |= b[0] & 0xFF;
+	    l <<= 8;
+	    l |= b[1] & 0xFF;
+	    l <<= 8;
+	    l |= b[2] & 0xFF;
+	    l <<= 8;
+	    l |= b[3] & 0xFF;
+	    l <<= 8;
+	    l |= b[4] & 0xFF;
+	    l <<= 8;
+	    l |= b[5] & 0xFF;
+	    return l;
+	}
+	
 	public static byte[] clearBytes(byte[] b) {
 		java.util.Arrays.fill(b, 0, b.length, new Integer(0).byteValue());
 		return b;

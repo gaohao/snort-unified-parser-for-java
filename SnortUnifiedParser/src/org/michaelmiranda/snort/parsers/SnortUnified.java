@@ -41,6 +41,7 @@ import java.nio.channels.*;
  */
 public class SnortUnified {
 
+	private FileChannel fc;
 	private ByteBuffer buf;
 	private byte[] bytes1;
 	private byte[] bytes2;
@@ -48,10 +49,12 @@ public class SnortUnified {
 	private byte[] bytes6;
 	
 	
+	private SnortPacketInterface snortPacket;
 	private Unified2RecordHeader header;
 	private Unified2Packet packet;
+	private EthernetFramePacket ethernetPacket;
+	private IPPacket ipPacket;
 	
-	public int startByteIndex = 0;
 	
 	/**
 	 * @param args
@@ -63,36 +66,54 @@ public class SnortUnified {
 		su.parse(f);
 	}
 	
-	
-	public void parse(String filename) {
-		
-		//DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
-		FileChannel fc = Utilities.getBinaryFilechannel(filename);
-		this.readRecordHeader(fc);
-		switch ((int)header.getType()) {
-			// Snort Event Record
-			case 7:
-				break;
-			// IPv4 Packet Record
-			case 2:
-				this.readPacketHeader(fc, header.getLength());
-				break;
-			default:
-				break;
-		}
-				
-	}
-	
-	public void readPacket(FileChannel fc, long packetLength) {
-		
-	}
-		
 	public SnortUnified() {
 		bytes1 = new byte[1];
 		bytes2 = new byte[2];
 		bytes4 = new byte[4];
 		bytes6 = new byte[6];
 	}
+	
+	public void parse(String filename) {
+		
+		//DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
+		fc = Utilities.getBinaryFilechannel(filename);
+		this.readRecordHeader();
+		switch ((int)header.getType()) {
+			// Snort Event Record
+			case 7:
+				break;
+			// IPv4 Packet Record
+			case 2:
+				this.readPacketHeader(header.getLength());
+				// based on the link type assign to proper packet 
+				switch ((int) packet.getLinktype()) {
+					case ETHERNET_LINK:
+						ethernetPacket = this.getEthernetPacketClear();
+						ethernetPacket.setU2Packet(packet);
+						this.parseEthernetFramePacket(fc);
+						// determine frame type and build associated packet
+						switch ((int) ethernetPacket.getFrameType()) {
+							case EthernetFramePacket.IP_TYPE:
+								ipPacket = this.getIPPacketClear();
+								ipPacket.setPacket(ethernetPacket);
+								break;
+							default:
+								break;
+						}
+						break;
+					default:
+						break;		
+				}
+				break;
+			default:
+				break;
+		}
+				
+		
+		
+				
+	}
+	
 	
 	private Unified2RecordHeader getHeaderClear() {
 		if (header == null) {
@@ -112,7 +133,25 @@ public class SnortUnified {
 		return packet;
 	}
 	
-	public void readRecordHeader(FileChannel fc) {
+	private EthernetFramePacket getEthernetPacketClear() {
+		if (ethernetPacket == null) {
+			ethernetPacket = new EthernetFramePacket();			
+		} else {
+			ethernetPacket.clear();
+		}
+		return ethernetPacket;
+	}
+	
+	private IPPacket getIPPacketClear() {
+		if (ipPacket == null) {
+			ipPacket = new IPPacket();			
+		} else {
+			ipPacket.clear();
+		}
+		return ipPacket;
+	}
+	
+	public void readRecordHeader() {
 		buf = ByteBuffer.allocate(HEADER_SIZE);
 		buf.clear();
 		try {
@@ -128,7 +167,7 @@ public class SnortUnified {
 		header = this.getHeaderClear();	
 		bytes4 = Utilities.clearBytes(bytes4);		
 		// get type
-		buf.get(bytes4, this.startByteIndex, TYPE_SIZE);
+		buf.get(bytes4, 0, TYPE_SIZE);
 		header.setType(Utilities.unsignedIntToLong(bytes4));
 		// clear buffer		
 		bytes4 = Utilities.clearBytes(bytes4);	
@@ -136,11 +175,11 @@ public class SnortUnified {
 		buf.get(bytes4, 0, LENGTH_SIZE);		
 		header.setLength(Utilities.unsignedIntToLong(bytes4));
 		// clear buffer
-		bytes4 = Utilities.clearBytes(bytes4);		
+		bytes4 = Utilities.clearBytes(bytes4);
 	}
 	
-	public void readPacketHeader(FileChannel fc, long recordLength) {
-		buf = ByteBuffer.allocate((int)header.length);
+	public void readPacketHeader(long recordLength) {
+		buf = ByteBuffer.allocate(PACKET_HEADER_SIZE);
 		buf.clear();
 		try {
 			int nread = 0;		
@@ -182,10 +221,41 @@ public class SnortUnified {
 		buf.get(bytes4, 0, PACKET_LENGTH_SIZE);
 		packet.setPacket_length(Utilities.unsignedIntToLong(bytes4));
 		bytes4 = Utilities.clearBytes(bytes4);
-		 
+
+
+	}		
+	
+	private void parseEthernetFramePacket(FileChannel fc) {
+		buf = ByteBuffer.allocate((int)packet.packet_length);
+		buf.clear();
+		try {			
+			int nread = 0;		
+			do {
+				nread = fc.read(buf);			
+			} while (nread != -1 && buf.hasRemaining());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		buf.rewind();
+		// parse out packet		
+		bytes6 = Utilities.clearBytes(bytes6);
+		// get dst mac address
+		buf.get(bytes6, 0, (int) EthernetFramePacket.DST_SIZE);
+		ethernetPacket.setEtherDestination(Utilities.sixBytesToLong(bytes6));
+		bytes6 = Utilities.clearBytes(bytes6);
+		// get src mac address
+		buf.get(bytes6, 0, (int) EthernetFramePacket.SRC_SIZE);
+		ethernetPacket.setEtherSource(Utilities.sixBytesToLong(bytes6));
+		bytes6 = Utilities.clearBytes(bytes6);
+		// get frame type
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, (int) EthernetFramePacket.FRAME_TYPE_SIZE);
+		ethernetPacket.setFrameType(Utilities.unsignedShortToInt(bytes2));
+		System.out.println("HI");
 	}
 	
 	public static final int HEADER_SIZE = 8;
+	public static final int PACKET_HEADER_SIZE = 28;
 	public static final int TYPE_SIZE = 4;
 	public static final int LENGTH_SIZE = 4;
 	public static final int SENSOR_ID_SIZE = 4;

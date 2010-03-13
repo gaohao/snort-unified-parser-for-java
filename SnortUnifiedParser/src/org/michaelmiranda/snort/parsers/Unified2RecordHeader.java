@@ -57,6 +57,13 @@ public class Unified2RecordHeader {
 		this.length = 0;
 		this.type = 0;
 	}
+	
+	public String toString() {
+		String s = "";
+		s += "U2H Type: " + this.type + "\n";
+		s += "U2H Length: " + this.length + "\n";
+		return s;
+	}
 
 	long length;
 	long type;

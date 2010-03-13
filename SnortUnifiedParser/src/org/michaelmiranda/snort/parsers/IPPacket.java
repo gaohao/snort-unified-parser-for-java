@@ -1,4 +1,5 @@
 /**
+
  * Copyright (c) 2010, Michael J. A. Miranda
  * All rights reserved.
  *
@@ -141,6 +142,14 @@ public class IPPacket implements SnortPacketInterface {
 	public void clear() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public String toString() {
+		String s = "";
+		s += this.getPacket().toString();
+		s += "VersionIHL: " + this.versionIhl + "\n";
+		s += "TOS: " + this.tos + "\n";
+		return s;
 	}
 	
 	private SnortPacketInterface packet;

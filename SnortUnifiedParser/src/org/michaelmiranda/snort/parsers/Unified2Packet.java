@@ -97,6 +97,19 @@ public class Unified2Packet {
 		this.setPacket_data((short)0);
 	}
 	
+	public String toString() {
+		String s = "";
+		s += "U2 Sensor ID: " + this.sensor_id + "\n";
+		s += "U2 Event ID: " + this.event_id + "\n";
+		s += "U2 Event Seconds: " + this.event_second + "\n";
+		s += "U2 Packet Seconds: " + this.packet_second + "\n";
+		s += "U2 Packet MicroSeconds: " + this.packet_microsecond + "\n";
+		s += "U2 Link Type: " + this.linktype + "\n";
+		s += "U2 Packet Length: " + this.packet_length + "\n";
+		s += "U2 Packet Data: " + this.packet_data + "\n";
+		return s;
+	}
+	
 	long sensor_id;
 	long event_id;
 	long event_second;

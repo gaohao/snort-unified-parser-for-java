@@ -89,6 +89,7 @@ public class SnortUnified {
 				switch ((int) packet.getLinktype()) {
 					case ETHERNET_LINK:
 						ethernetPacket = this.getEthernetPacketClear();
+						ethernetPacket.setU2header(header);
 						ethernetPacket.setU2Packet(packet);
 						this.parseEthernetFramePacket(fc);
 						// determine frame type and build associated packet
@@ -96,6 +97,7 @@ public class SnortUnified {
 							case EthernetFramePacket.IP_TYPE:
 								ipPacket = this.getIPPacketClear();
 								ipPacket.setPacket(ethernetPacket);
+								snortPacket = ipPacket;
 								break;
 							default:
 								break;
@@ -108,10 +110,7 @@ public class SnortUnified {
 			default:
 				break;
 		}
-				
-		
-		
-				
+		System.out.println(snortPacket.toString());
 	}
 	
 	
@@ -252,6 +251,13 @@ public class SnortUnified {
 		buf.get(bytes2, 0, (int) EthernetFramePacket.FRAME_TYPE_SIZE);
 		ethernetPacket.setFrameType(Utilities.unsignedShortToInt(bytes2));
 		System.out.println("HI");
+	}
+	
+	public String toString() {
+		String s = "";
+		s += this.header.toString() + "\n";
+		s += this.packet + "\n";
+		return s;
 	}
 	
 	public static final int HEADER_SIZE = 8;

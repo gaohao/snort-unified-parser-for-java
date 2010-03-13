@@ -39,6 +39,22 @@ package org.michaelmiranda.snort.parsers;
 public class EthernetFramePacket implements SnortPacketInterface {
 	
 	
+	/**
+	 * @return the u2header
+	 */
+	public Unified2RecordHeader getU2header() {
+		return u2header;
+	}
+
+
+	/**
+	 * @param u2header the u2header to set
+	 */
+	public void setU2header(Unified2RecordHeader u2header) {
+		this.u2header = u2header;
+	}
+
+
 	public void clear() {
 		u2packet = null;		
 	}
@@ -104,12 +120,23 @@ public class EthernetFramePacket implements SnortPacketInterface {
 		this.frameType = frameType;
 	}
 	
+	public String toString() {
+		String s = "";
+		s += u2header.toString();
+		s += u2packet.toString();
+		s += "ETHER SRC: " + this.etherSource + "\n";
+		s += "ETHER DST: " + this.etherDestination + "\n";
+		s += "FRAME TYPE: " + this.frameType + "\n";
+		return s;
+	}
+	
 	private long etherDestination;
 	private long etherSource;
 	private long frameType;
 
+	private Unified2RecordHeader u2header;
+	private Unified2Packet u2packet;
 	
-	private Unified2Packet u2packet;	
 	public static final long DST_SIZE = 6;
 	public static final long SRC_SIZE = 6;
 	public static final long FRAME_TYPE_SIZE = 2;

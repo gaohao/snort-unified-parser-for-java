@@ -39,4 +39,6 @@ public interface SnortPacketInterface {
 
 	public void clear();
 	
+	public String toString();
+	
 }

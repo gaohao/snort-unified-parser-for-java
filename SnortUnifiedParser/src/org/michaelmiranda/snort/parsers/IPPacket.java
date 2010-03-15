@@ -53,25 +53,26 @@ public class IPPacket implements SnortPacketInterface {
 	/**
 	 * @return the versionIhl
 	 */
-	public short getVersionIhl() {
+	public int getVersionIhl() {
 		return versionIhl;
 	}
+	
 	/**
 	 * @param versionIhl the versionIhl to set
 	 */
-	public void setVersionIhl(short versionIhl) {
+	public void setVersionIhl(int versionIhl) {
 		this.versionIhl = versionIhl;
 	}
 	/**
 	 * @return the tos
 	 */
-	public short getTos() {
+	public int getTos() {
 		return tos;
 	}
 	/**
 	 * @param tos the tos to set
 	 */
-	public void setTos(short tos) {
+	public void setTos(int tos) {
 		this.tos = tos;
 	}
 	/**
@@ -122,6 +123,7 @@ public class IPPacket implements SnortPacketInterface {
 	public void setProto(short proto) {
 		this.proto = proto;
 	}
+	
 	/**
 	 * @return the checksum
 	 */
@@ -153,12 +155,14 @@ public class IPPacket implements SnortPacketInterface {
 	}
 	
 	private SnortPacketInterface packet;
-	private short versionIhl;
-	private short tos;
+	private int versionIhl;
+	private int tos;
 	private long len;
 	private long id;
 	private long flagFrag;
 	private short proto;
 	private short checksum;
+	
+	
 
 }

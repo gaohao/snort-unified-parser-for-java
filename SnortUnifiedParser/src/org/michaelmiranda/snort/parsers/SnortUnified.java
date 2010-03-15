@@ -97,6 +97,7 @@ public class SnortUnified {
 							case EthernetFramePacket.IP_TYPE:
 								ipPacket = this.getIPPacketClear();
 								ipPacket.setPacket(ethernetPacket);
+								this.parseIPPacket(buf);
 								snortPacket = ipPacket;
 								break;
 							default:
@@ -224,7 +225,7 @@ public class SnortUnified {
 
 	}		
 	
-	private void parseEthernetFramePacket(FileChannel fc) {
+	private ByteBuffer parseEthernetFramePacket(FileChannel fc) {
 		buf = ByteBuffer.allocate((int)packet.packet_length);
 		buf.clear();
 		try {			
@@ -251,6 +252,40 @@ public class SnortUnified {
 		buf.get(bytes2, 0, (int) EthernetFramePacket.FRAME_TYPE_SIZE);
 		ethernetPacket.setFrameType(Utilities.unsignedShortToInt(bytes2));
 		System.out.println("HI");
+		return buf;
+	}
+	
+	private void parseIPPacket(ByteBuffer buf) {
+		try {
+			System.out.println("Pos: " + fc.position());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		int t = 0;
+		int t_tmp = 0;
+		bytes2 = Utilities.clearBytes(bytes2);
+		// get ip protocol and length
+		buf.get(bytes2, 0, 2);
+		t = Utilities.unsignedShortToInt(bytes2);
+		this.ipPacket.setVersionIhl(t);
+		bytes2 = Utilities.clearBytes(bytes2);
+		// based on length get the remaining bytes
+		
+		
+		
+		// get protocol
+		//t_tmp = t>>12;
+		
+		
+		
+		int t2 = 0;		
+		bytes2 = Utilities.clearBytes(bytes2);
+		// now read the version which is the first 4-bits of this byte
+		
+		
+		// now read the length which is the second 4-bits of this byte
+		
+
 	}
 	
 	public String toString() {

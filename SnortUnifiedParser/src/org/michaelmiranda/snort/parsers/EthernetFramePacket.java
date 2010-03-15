@@ -56,7 +56,11 @@ public class EthernetFramePacket implements SnortPacketInterface {
 
 
 	public void clear() {
-		u2packet = null;		
+		u2header = null;
+		u2packet = null;
+		etherDestination = 0;
+		etherSource = 0;
+		frameType = 0;
 	}
 	
 		

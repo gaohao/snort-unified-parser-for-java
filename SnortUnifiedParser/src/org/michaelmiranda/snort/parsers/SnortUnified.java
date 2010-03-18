@@ -261,30 +261,53 @@ public class SnortUnified {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		int t = 0;
-		int t_tmp = 0;
 		bytes2 = Utilities.clearBytes(bytes2);
 		// get ip protocol and length
-		buf.get(bytes2, 0, 2);
-		t = Utilities.unsignedShortToInt(bytes2);
-		this.ipPacket.setVersionIhl(t);
+		buf.get(bytes2, 0, IPPacket.VERSION_IHL_TOS_SIZE);
+		this.ipPacket.setVersionIhl(Utilities.unsignedShortToInt(bytes2));
+		// it is the first of the two bytes in bytes2
+		// bit shifting is used to isolate the first byte
+		this.ipPacket.setVersionIhl(this.ipPacket.getVersionIhl()>>8);		
+		// get tos
+		// it is the last of the two bytes in bytes2
+		// zero out the first byte to isolate the last byte
+		bytes2[0] = 0;
+		this.ipPacket.setTos(Utilities.unsignedShortToInt(bytes2));
+		bytes2 = Utilities.clearBytes(bytes2);	
+		// get length of IP header
+		buf.get(bytes2, 0, IPPacket.LENGTH_SIZE);
+		this.ipPacket.setLen(Utilities.unsignedShortToInt(bytes2));
 		bytes2 = Utilities.clearBytes(bytes2);
-		// based on length get the remaining bytes
-		
-		
-		
+		// get ID
+		buf.get(bytes2, 0, IPPacket.ID_SIZE);
+		this.ipPacket.setId(Utilities.unsignedShortToInt(bytes2));
+		bytes2 = Utilities.clearBytes(bytes2);
+		// get Flag/Frag
+		buf.get(bytes2, 0, IPPacket.FLAG_FRAG_SIZE);
+		this.ipPacket.setFlagFrag(Utilities.unsignedShortToInt(bytes2));
+		bytes2 = Utilities.clearBytes(bytes2);
+		// get ttl 
+		// bit shift to isolate the first byte
+		buf.get(bytes2, 0, IPPacket.TTL_PROTO_SIZE);
+		this.ipPacket.setTtl((short)(Utilities.unsignedShortToInt(bytes2)>>8));
 		// get protocol
-		//t_tmp = t>>12;
-		
-		
-		
-		int t2 = 0;		
+		// zero out the first byte to isolate the last byte
+		bytes2[0] = 0;
+		this.ipPacket.setProto((short)(Utilities.unsignedShortToInt(bytes2)));
 		bytes2 = Utilities.clearBytes(bytes2);
-		// now read the version which is the first 4-bits of this byte
-		
-		
-		// now read the length which is the second 4-bits of this byte
-		
+		// get chksum
+		buf.get(bytes2, 0, IPPacket.CHKSUM_SIZE);
+		this.ipPacket.setChecksum(Utilities.unsignedShortToInt(bytes2));
+		bytes2 = Utilities.clearBytes(bytes2);
+		// get source
+		bytes4 = Utilities.clearBytes(bytes4);
+		buf.get(bytes4, 0, IPPacket.SRC_SIZE);
+		this.ipPacket.setIpSource(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get destination
+		buf.get(bytes4, 0, IPPacket.DST_SIZE);
+		this.ipPacket.setIpDestination(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
 
 	}
 	

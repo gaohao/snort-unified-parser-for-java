@@ -39,6 +39,18 @@ package org.michaelmiranda.snort.parsers;
 public class IPPacket implements SnortPacketInterface {
 	
 	/**
+	 * @return the ttl
+	 */
+	public short getTtl() {
+		return ttl;
+	}
+	/**
+	 * @param ttl the ttl to set
+	 */
+	public void setTtl(short ttl) {
+		this.ttl = ttl;
+	}
+	/**
 	 * @return the packet
 	 */
 	public SnortPacketInterface getPacket() {
@@ -127,14 +139,38 @@ public class IPPacket implements SnortPacketInterface {
 	/**
 	 * @return the checksum
 	 */
-	public short getChecksum() {
+	public int getChecksum() {
 		return checksum;
 	}
 	/**
 	 * @param checksum the checksum to set
 	 */
-	public void setChecksum(short checksum) {
+	public void setChecksum(int checksum) {
 		this.checksum = checksum;
+	}
+	/**
+	 * @return the ipSource
+	 */
+	public long getIpSource() {
+		return ipSource;
+	}
+	/**
+	 * @param ipSource the ipSource to set
+	 */
+	public void setIpSource(long ipSource) {
+		this.ipSource = ipSource;
+	}
+	/**
+	 * @return the ipDestination
+	 */
+	public long getIpDestination() {
+		return ipDestination;
+	}
+	/**
+	 * @param ipDestination the ipDestination to set
+	 */
+	public void setIpDestination(long ipDestination) {
+		this.ipDestination = ipDestination;
 	}
 	
 	/* (non-Javadoc)
@@ -149,8 +185,17 @@ public class IPPacket implements SnortPacketInterface {
 	public String toString() {
 		String s = "";
 		s += this.getPacket().toString();
-		s += "VersionIHL: " + this.versionIhl + "\n";
-		s += "TOS: " + this.tos + "\n";
+		s += "IP VersionIHL: " + this.versionIhl + "\n";
+		s += "IP TOS: " + this.tos + "\n";
+		s += "IP Length: " + this.len + "\n";
+		s += "IP ID: " + this.id + "\n";
+		s += "IP Flag/Frag: " + this.flagFrag + "\n";
+		s += "IP TTL: " + this.ttl + "\n";
+		s += "IP Protocol: " + this.proto + "\n";
+		s += "IP Chksum: " + this.checksum + "\n";
+		s += "IP Source: " + this.ipSource + "\n";
+		s += "IP Destination: " + this.ipDestination +"\n";
+		
 		return s;
 	}
 	
@@ -160,9 +205,20 @@ public class IPPacket implements SnortPacketInterface {
 	private long len;
 	private long id;
 	private long flagFrag;
+	private short ttl;
 	private short proto;
-	private short checksum;
+	private int checksum;
+	private long ipSource;
+	private long ipDestination;
 	
-	
+	public final static int VERSION_IHL_TOS_SIZE = 2;	
+	public final static int LENGTH_SIZE = 2;
+	public final static int ID_SIZE = 2;
+	public final static int FLAG_FRAG_SIZE = 2;
+	public final static int TTL_PROTO_SIZE = 2;
+	public final static int CHKSUM_SIZE = 2;
+	public final static int SRC_SIZE = 4;
+	public final static int DST_SIZE = 4;
+		
 
 }

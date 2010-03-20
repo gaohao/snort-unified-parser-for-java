@@ -54,7 +54,7 @@ public class SnortUnified {
 	private Unified2Packet packet;
 	private EthernetFramePacket ethernetPacket;
 	private IPPacket ipPacket;
-	
+	private TCPPacket tcpPacket;
 	
 	/**
 	 * @param args
@@ -98,7 +98,18 @@ public class SnortUnified {
 								ipPacket = this.getIPPacketClear();
 								ipPacket.setPacket(ethernetPacket);
 								this.parseIPPacket(buf);
-								snortPacket = ipPacket;
+								switch ((int) ipPacket.getProto()) {
+									case TCP_PROTOCOL:
+										tcpPacket = this.getTCPPacketClear();
+										tcpPacket.setPacket(ipPacket);
+										this.parseTCPPacket(buf);
+										this.snortPacket = this.tcpPacket;
+										break;
+									case UDP_PROTOCOL:
+										
+										break;
+									
+								}								
 								break;
 							default:
 								break;
@@ -149,6 +160,15 @@ public class SnortUnified {
 			ipPacket.clear();
 		}
 		return ipPacket;
+	}
+	
+	private TCPPacket getTCPPacketClear() {
+		if (tcpPacket == null) {
+			tcpPacket = new TCPPacket();			
+		} else {
+			tcpPacket.clear();
+		}
+		return tcpPacket;
 	}
 	
 	public void readRecordHeader() {
@@ -256,11 +276,7 @@ public class SnortUnified {
 	}
 	
 	private void parseIPPacket(ByteBuffer buf) {
-		try {
-			System.out.println("Pos: " + fc.position());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+
 		bytes2 = Utilities.clearBytes(bytes2);
 		// get ip protocol and length
 		buf.get(bytes2, 0, IPPacket.VERSION_IHL_TOS_SIZE);
@@ -311,6 +327,41 @@ public class SnortUnified {
 
 	}
 	
+	public void parseTCPPacket(ByteBuffer buf) {
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get source port
+		buf.get(bytes4, 0, TCPPacket.PORT_SIZE);
+		this.tcpPacket.setPortSource(Utilities.unsignedShortToInt(bytes4));
+		// get destination port
+		bytes4 = Utilities.clearBytes(bytes4);
+		buf.get(bytes4, 0, TCPPacket.PORT_SIZE);
+		this.tcpPacket.setPortDestination(Utilities.unsignedShortToInt(bytes4));
+		// get sequence number
+		bytes4 = Utilities.clearBytes(bytes4);
+		buf.get(bytes4, 0, TCPPacket.SEQ_SIZE);
+		this.tcpPacket.setSequence(Utilities.unsignedIntToLong(bytes4));
+		// get ack number
+		bytes4 = Utilities.clearBytes(bytes4);
+		buf.get(bytes4, 0, TCPPacket.ACK_SIZE);
+		this.tcpPacket.setAck(Utilities.unsignedIntToLong(bytes4));
+		// get offset number
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, TCPPacket.OFFSET_SIZE);
+		this.tcpPacket.setOffset(Utilities.unsignedShortToInt(bytes2));
+		// get window size
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, TCPPacket.WIN_SIZE);
+		this.tcpPacket.setWin(Utilities.unsignedShortToInt(bytes2));
+		// get chksum
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, TCPPacket.CHKSUM_SIZE);
+		this.tcpPacket.setChksum(Utilities.unsignedShortToInt(bytes2));
+		// get URG_P
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, TCPPacket.URGP_SIZE);
+		this.tcpPacket.setUrg_p(Utilities.unsignedShortToInt(bytes2));
+	}
+	
 	public String toString() {
 		String s = "";
 		s += this.header.toString() + "\n";
@@ -331,4 +382,6 @@ public class SnortUnified {
 	public static final int PACKET_LENGTH_SIZE = 4;
 
 	public static final int ETHERNET_LINK = 1;
+	public static final int TCP_PROTOCOL = 6;
+	public static final int UDP_PROTOCOL = 11;
 }

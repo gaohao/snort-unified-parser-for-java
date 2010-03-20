@@ -35,7 +35,7 @@ package org.michaelmiranda.snort.parsers;
  * @author Michael J. A. Miranda
  *
  */
-public class TCPPacket {
+public class TCPPacket implements SnortPacketInterface {
 
 	
 	/**
@@ -49,30 +49,6 @@ public class TCPPacket {
 	 */
 	public void setPacket(SnortPacketInterface packet) {
 		this.packet = packet;
-	}
-	/**
-	 * @return the ipSource
-	 */
-	public long getIpSource() {
-		return ipSource;
-	}
-	/**
-	 * @param ipSource the ipSource to set
-	 */
-	public void setIpSource(long ipSource) {
-		this.ipSource = ipSource;
-	}
-	/**
-	 * @return the ipDestination
-	 */
-	public long getIpDestination() {
-		return ipDestination;
-	}
-	/**
-	 * @param ipDestination the ipDestination to set
-	 */
-	public void setIpDestination(long ipDestination) {
-		this.ipDestination = ipDestination;
 	}
 	/**
 	 * @return the portSource
@@ -182,11 +158,32 @@ public class TCPPacket {
 	public void setPayload(String payload) {
 		this.payload = payload;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.michaelmiranda.snort.parsers.SnortPacketInterface#clear()
+	 */
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
 	
+	
+	public String toString() {
+		String s = "";
+		s += this.packet.toString();
+		s += "TCP Port Source: " + this.portSource + "\n";
+		s += "TCP Port Destination: " + this.portDestination + "\n";
+		s += "TCP Sequence: " + this.sequence + "\n";
+		s += "TCP Ack: " + this.ack + "\n";
+		s += "TCP Offset: " + this.offset + "\n";
+		s += "TCP Window: " + this.win + "\n";
+		s += "TCP Chksum: " + this.chksum + "\n";
+		s += "TCP URG_P: " + this.urg_p + "\n";
+		return s;
+	}
 	
 	private SnortPacketInterface packet;
-	private long ipSource;
-	private long ipDestination;
 	private long portSource;
 	private long portDestination;
 	private long sequence;
@@ -196,5 +193,15 @@ public class TCPPacket {
 	private long  chksum;
 	private long urg_p;
 	private String payload;
+	
+	public static final int PORT_SIZE = 2;
+	public static final int SEQ_SIZE = 4;
+	public static final int ACK_SIZE = 4;
+	public static final int OFFSET_SIZE = 2;
+	public static final int WIN_SIZE = 2;
+	public static final int CHKSUM_SIZE = 2;
+	public static final int URGP_SIZE = 2;
+
+	
 	
 }

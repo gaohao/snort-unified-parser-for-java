@@ -32,12 +32,15 @@
  */
 package org.michaelmiranda.snort.parsers;
 
+import java.net.*;
+
 /**
  * @author Michael J. A. Miranda
  *
  */
 public class IPPacket implements SnortPacketInterface {
-	
+		
+    
 	/**
 	 * @return the ttl
 	 */
@@ -192,9 +195,11 @@ public class IPPacket implements SnortPacketInterface {
 		s += "IP Flag/Frag: " + this.flagFrag + "\n";
 		s += "IP TTL: " + this.ttl + "\n";
 		s += "IP Protocol: " + this.proto + "\n";
-		s += "IP Chksum: " + this.checksum + "\n";
-		s += "IP Source: " + this.ipSource + "\n";
-		s += "IP Destination: " + this.ipDestination +"\n";
+		s += "IP Chksum: " + this.checksum + "\n";	
+		
+		s += "IP Source: " + Utilities.longToIPAddress(this.ipSource) + "\n";		
+		s += "IP Destination: " + Utilities.longToIPAddress(this.ipDestination) +"\n";
+		
 		
 		return s;
 	}

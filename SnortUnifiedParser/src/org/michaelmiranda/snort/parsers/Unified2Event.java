@@ -35,7 +35,7 @@ package org.michaelmiranda.snort.parsers;
  * @author Michael J. A. Miranda
  *
  */
-public class Unified2Event {
+public class Unified2Event implements SnortPacketInterface {
 	
 	public long getSensor_id() {
 		return sensor_id;
@@ -51,6 +51,7 @@ public class Unified2Event {
 		event_id = eventId;
 	}
 	public long getEvent_second() {
+		
 		return event_second;
 	}
 	public void setEvent_second(long eventSecond) {
@@ -116,16 +117,16 @@ public class Unified2Event {
 	public void setDport_icode(long dportIcode) {
 		dport_icode = dportIcode;
 	}
-	public int getProtocol() {
+	public short getProtocol() {
 		return protocol;
 	}
-	public void setProtocol(int protocol) {
+	public void setProtocol(short protocol) {
 		this.protocol = protocol;
 	}
-	public int getPacket_action() {
+	public short getPacket_action() {
 		return packet_action;
 	}
-	public void setPacket_action(int packetAction) {
+	public void setPacket_action(short packetAction) {
 		packet_action = packetAction;
 	}
 	public int getPad() {
@@ -135,6 +136,20 @@ public class Unified2Event {
 		this.pad = pad;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.michaelmiranda.snort.parsers.SnortPacketInterface#clear()
+	 */
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public String toString() {
+		String s = "";
+		s += "Event SensorID: " + this.sensor_id + "\n";
+		return s;		
+	}
 	
 	long sensor_id;
 	long event_id;
@@ -149,8 +164,9 @@ public class Unified2Event {
 	long ip_destination;
 	long sport_itype;
 	long dport_icode;
-	int protocol;
-	int packet_action;
+	short protocol;
+	short packet_action;
 	int pad;
+	
 
 }

@@ -32,7 +32,9 @@
 package org.michaelmiranda.snort.parsers;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.nio.channels.*;
+import java.nio.*;
 
 /**
  * @author Michael J. A. Miranda
@@ -106,6 +108,28 @@ public class Utilities {
 	public static byte[] clearBytes(byte[] b) {
 		java.util.Arrays.fill(b, 0, b.length, new Integer(0).byteValue());
 		return b;
+	}
+	
+	
+	private static byte[] bArray = new byte[4];
+    private static ByteBuffer bBuffer  = ByteBuffer.wrap(bArray);
+    private static IntBuffer lBuffer =  bBuffer.asIntBuffer();
+    
+	public static byte[] longToByteArray(long l) {
+		lBuffer.clear();
+        lBuffer.put(0, (int) l);        
+        return bArray;
+	}
+	
+	public static String longToIPAddress(long l) {
+		String ipAddressString = "";
+		try {
+			ipAddressString = InetAddress.getByAddress(Utilities.longToByteArray(l)).getHostAddress();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ipAddressString;
+		
 	}
 
 	

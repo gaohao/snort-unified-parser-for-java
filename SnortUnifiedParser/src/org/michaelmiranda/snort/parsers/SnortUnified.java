@@ -34,6 +34,7 @@ package org.michaelmiranda.snort.parsers;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import org.apache.commons.codec.binary.*;
 
 /**
  * @author Michael J. A. Miranda
@@ -51,6 +52,7 @@ public class SnortUnified {
 	
 	private SnortPacketInterface snortPacket;
 	private Unified2RecordHeader header;
+	private Unified2Event event;
 	private Unified2Packet packet;
 	private EthernetFramePacket ethernetPacket;
 	private IPPacket ipPacket;
@@ -63,7 +65,7 @@ public class SnortUnified {
 		// TODO Auto-generated method stub
 		String f = "snort2.log.1267172679";
 		SnortUnified su = new SnortUnified();
-		su.parse(f);
+		su.parse(f);		
 	}
 	
 	public SnortUnified() {
@@ -74,13 +76,22 @@ public class SnortUnified {
 	}
 	
 	public void parse(String filename) {
-		
-		//DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
-		fc = Utilities.getBinaryFilechannel(filename);
+		// pre-parsing setup
+		// DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
+		fc = Utilities.getBinaryFilechannel(filename);		
+		// start parsing
+		for (int i = 0; i < 100; i++) {
+			this.startParsing();
+		}
+	}
+	
+	private void startParsing() {
 		this.readRecordHeader();
 		switch ((int)header.getType()) {
 			// Snort Event Record
 			case 7:
+				this.readEventHeader(header.getLength());
+				this.snortPacket = this.event;				
 				break;
 			// IPv4 Packet Record
 			case 2:
@@ -119,8 +130,8 @@ public class SnortUnified {
 						break;		
 				}
 				break;
-			default:
-				break;
+			default:				
+				break;							
 		}
 		System.out.println(snortPacket.toString());
 	}
@@ -133,6 +144,15 @@ public class SnortUnified {
 			header.clear();
 		}
 		return header;		
+	}
+	
+	private Unified2Event getEventClear() {
+		if (event == null) {
+			event = new Unified2Event();
+		} else {
+			event.clear();
+		}
+		return event;
 	}
 	
 	private Unified2Packet getPacketClear() {
@@ -198,6 +218,87 @@ public class SnortUnified {
 		bytes4 = Utilities.clearBytes(bytes4);
 	}
 	
+	public void readEventHeader(long recordLength) {
+		buf = ByteBuffer.allocate(EVENT_HEADER_SIZE);
+		buf.clear();
+		try {
+			int nread = 0;		
+			do {
+				nread = fc.read(buf);			
+			} while (nread != -1 && buf.hasRemaining());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		buf.rewind();
+		event = this.getEventClear();
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get sensor id
+		buf.get(bytes4, 0, SENSOR_ID_SIZE);
+		event.setSensor_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get event id
+		buf.get(bytes4, 0, EVENT_ID_SIZE);
+		event.setEvent_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get event seconds
+		buf.get(bytes4, 0, EVENT_SEC_SIZE);
+		event.setEvent_second(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get event micro seconds
+		buf.get(bytes4, 0, EVENT_MSEC_SIZE);
+		event.setEvent_microsecond(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get sig id
+		buf.get(bytes4, 0, SIG_ID_SIZE);
+		event.setSignature_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get gen id
+		buf.get(bytes4, 0, GEN_ID_SIZE);
+		event.setGenerator_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get signature revision
+		buf.get(bytes4, 0, SIG_REV_SIZE);
+		event.setSignature_revision(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get class id
+		buf.get(bytes4, 0, CLASS_ID_SIZE);
+		event.setClassification_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get priority
+		buf.get(bytes4, 0, PRIORITY_SIZE);
+		event.setPriority_id(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get source IP address
+		buf.get(bytes4, 0, IP_SOURCE_SIZE);
+		event.setIp_source(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get destination IP address
+		buf.get(bytes4, 0, IP_DESTINATION_SIZE);
+		event.setIp_destination(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get source port
+		buf.get(bytes4, 0, PORT_SOURCE_SIZE);
+		event.setSport_itype(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get destination port
+		buf.get(bytes4, 0, PORT_DESTINATION_SIZE);
+		event.setDport_icode(Utilities.unsignedIntToLong(bytes4));
+		bytes4 = Utilities.clearBytes(bytes4);
+		// get protocol, packet action
+		bytes2 = Utilities.clearBytes(bytes2);
+		buf.get(bytes2, 0, PROTOCOL_PKTACTION_SIZE);
+		// use bit shifting to isolate the first of two bytes
+		event.setProtocol((short)(Utilities.unsignedShortToInt(bytes2)>>8));
+		// zero out the first byte to isolate the second byte
+		bytes2[0] = 0;
+		event.setPacket_action((short)(Utilities.unsignedShortToInt(bytes2)));
+		bytes2 = Utilities.clearBytes(bytes2);
+		// get padding
+		buf.get(bytes2, 0, PADDING_SIZE);
+		event.setPad(Utilities.unsignedShortToInt(bytes2));
+		bytes2 = Utilities.clearBytes(bytes2);
+	}
+	
 	public void readPacketHeader(long recordLength) {
 		buf = ByteBuffer.allocate(PACKET_HEADER_SIZE);
 		buf.clear();
@@ -242,7 +343,6 @@ public class SnortUnified {
 		packet.setPacket_length(Utilities.unsignedIntToLong(bytes4));
 		bytes4 = Utilities.clearBytes(bytes4);
 
-
 	}		
 	
 	private ByteBuffer parseEthernetFramePacket(FileChannel fc) {
@@ -271,7 +371,6 @@ public class SnortUnified {
 		bytes2 = Utilities.clearBytes(bytes2);
 		buf.get(bytes2, 0, (int) EthernetFramePacket.FRAME_TYPE_SIZE);
 		ethernetPacket.setFrameType(Utilities.unsignedShortToInt(bytes2));
-		System.out.println("HI");
 		return buf;
 	}
 	
@@ -324,7 +423,7 @@ public class SnortUnified {
 		buf.get(bytes4, 0, IPPacket.DST_SIZE);
 		this.ipPacket.setIpDestination(Utilities.unsignedIntToLong(bytes4));
 		bytes4 = Utilities.clearBytes(bytes4);
-
+		
 	}
 	
 	public void parseTCPPacket(ByteBuffer buf) {
@@ -360,6 +459,10 @@ public class SnortUnified {
 		bytes2 = Utilities.clearBytes(bytes2);
 		buf.get(bytes2, 0, TCPPacket.URGP_SIZE);
 		this.tcpPacket.setUrg_p(Utilities.unsignedShortToInt(bytes2));
+		// get payload		
+		byte[] payload_bytes = new byte[buf.limit() - buf.position()];
+		buf.get(payload_bytes, 0, buf.limit() - buf.position());
+		this.tcpPacket.setPayload(Hex.encodeHex(payload_bytes));		
 	}
 	
 	public String toString() {
@@ -371,11 +474,27 @@ public class SnortUnified {
 	
 	public static final int HEADER_SIZE = 8;
 	public static final int PACKET_HEADER_SIZE = 28;
+	public static final int EVENT_HEADER_SIZE = 52;
+	
 	public static final int TYPE_SIZE = 4;
 	public static final int LENGTH_SIZE = 4;
 	public static final int SENSOR_ID_SIZE = 4;
 	public static final int EVENT_ID_SIZE = 4;
 	public static final int EVENT_SEC_SIZE = 4;
+	public static final int EVENT_MSEC_SIZE = 4;
+	public static final int SIG_ID_SIZE = 4;
+	public static final int GEN_ID_SIZE = 4;
+	public static final int SIG_REV_SIZE = 4;
+	public static final int CLASS_ID_SIZE = 4;
+	public static final int PRIORITY_SIZE = 4;
+	public static final int IP_SOURCE_SIZE = 4;
+	public static final int IP_DESTINATION_SIZE = 4;
+	public static final int PORT_SOURCE_SIZE = 4;
+	public static final int PORT_DESTINATION_SIZE = 4;
+	public static final int PROTOCOL_PKTACTION_SIZE = 2;
+	public static final int PADDING_SIZE = 2;
+	
+	
 	public static final int PACKET_SEC_SIZE = 4;
 	public static final int PACKET_MSEC_SIZE = 4;
 	public static final int LINK_TYPE_SIZE = 4;

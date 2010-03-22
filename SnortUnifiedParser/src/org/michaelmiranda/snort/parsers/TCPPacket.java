@@ -31,6 +31,7 @@
  */
 package org.michaelmiranda.snort.parsers;
 
+import org.apache.commons.codec.binary.*;
 /**
  * @author Michael J. A. Miranda
  *
@@ -149,13 +150,13 @@ public class TCPPacket implements SnortPacketInterface {
 	/**
 	 * @return the payload
 	 */
-	public String getPayload() {
+	public char[] getPayload() {
 		return payload;
 	}
 	/**
 	 * @param payload the payload to set
 	 */
-	public void setPayload(String payload) {
+	public void setPayload(char[] payload) {
 		this.payload = payload;
 	}
 
@@ -180,6 +181,11 @@ public class TCPPacket implements SnortPacketInterface {
 		s += "TCP Window: " + this.win + "\n";
 		s += "TCP Chksum: " + this.chksum + "\n";
 		s += "TCP URG_P: " + this.urg_p + "\n";
+		try {
+			s += "TCP Payload: " + Hex.encodeHexString(Hex.decodeHex(this.payload)) + "\n";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return s;
 	}
 	
@@ -192,7 +198,7 @@ public class TCPPacket implements SnortPacketInterface {
 	private long win;
 	private long  chksum;
 	private long urg_p;
-	private String payload;
+	private char[] payload;
 	
 	public static final int PORT_SIZE = 2;
 	public static final int SEQ_SIZE = 4;

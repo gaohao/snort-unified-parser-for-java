@@ -80,8 +80,15 @@ public class SnortUnified {
 		// DataInputStream inputStream = Utilities.getBinaryFileStream(filename);
 		fc = Utilities.getBinaryFilechannel(filename);		
 		// start parsing
-		for (int i = 0; i < 100; i++) {
-			this.startParsing();
+		int packet_count = 0;
+		try {
+			while (fc.position() != fc.size()) {
+				System.out.println("Packet Count: " + ++packet_count);
+				System.out.println("Position (" + fc.size() + ": " + fc.position());
+				this.startParsing();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	

@@ -34,6 +34,8 @@ package org.michaelmiranda.snort.parsers;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import java.util.Arrays;
+
 import org.apache.commons.codec.binary.*;
 
 /**
@@ -137,7 +139,8 @@ public class SnortUnified {
 						break;		
 				}
 				break;
-			default:				
+			default:
+				readDefault((int)header.getLength());
 				break;							
 		}
 		if (snortPacket != null) {
@@ -212,12 +215,15 @@ public class SnortUnified {
 			e.printStackTrace();
 		}
 		buf.rewind();
+		
 		// parse out header
 		header = this.getHeaderClear();	
-		bytes4 = Utilities.clearBytes(bytes4);		
+		bytes4 = Utilities.clearBytes(bytes4);	
+		
 		// get type
 		buf.get(bytes4, 0, TYPE_SIZE);
 		header.setType(Utilities.unsignedIntToLong(bytes4));
+		
 		// clear buffer		
 		bytes4 = Utilities.clearBytes(bytes4);	
 		// get length		
@@ -227,6 +233,19 @@ public class SnortUnified {
 		bytes4 = Utilities.clearBytes(bytes4);
 	}
 	
+	public void readDefault(int l) {
+		buf = ByteBuffer.allocate(l);
+		buf.clear();
+		try {
+			int nread = 0;		
+			do {
+				nread = fc.read(buf);			
+			} while (nread != -1 && buf.hasRemaining());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		buf.rewind();
+	}
 	public void readEventHeader(long recordLength) {
 		buf = ByteBuffer.allocate(EVENT_HEADER_SIZE);
 		buf.clear();

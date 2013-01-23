@@ -63,7 +63,7 @@ public class SnortUnified {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		String f = "snort2.log.1267172679";
+		String f = "/Users/haogao/snort/merged.log";
 		SnortUnified su = new SnortUnified();
 		su.parse(f);		
 	}
@@ -140,7 +140,9 @@ public class SnortUnified {
 			default:				
 				break;							
 		}
-		System.out.println(snortPacket.toString());
+		if (snortPacket != null) {
+			System.out.println(snortPacket.toString());
+		}
 	}
 	
 	
